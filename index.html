@@ -3,6 +3,10 @@
 <head>
 	<title>My Portfolio</title>
 	<link rel="stylesheet" type="text/css" href="style.css">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.27.0/themes/prism.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.27.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.27.0/components/prism-java.min.js"></script>
 </head>
 <body>
 	<header>
@@ -18,8 +22,19 @@
             </div>
 			<div class="text">
 				<h2>About Me</h2>
-				<p>Hello visitor! Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc,</p>
-			</div>
+                <p>
+                    I am a highly experienced software developer with a passion for creating innovative and accessible applications. With over a decade of experience in the industry, I have honed my skills in various programming languages and development methodologies. My dedication to continuous learning and improvement has allowed me to stay at the forefront of technology trends and best practices.
+                </p>
+                <p>
+                    As someone who is hard of hearing, I understand the importance of accessibility in software development. I am committed to ensuring that the applications I create are inclusive and user-friendly for people with diverse abilities. This personal experience has driven me to become an advocate for accessibility within the development community.
+                </p>
+                <p>
+                    In my free time, I enjoy exploring new technologies and expanding my knowledge in the field of computer science. I also have a keen interest in assistive technologies and their potential to improve the lives of individuals with disabilities. When I'm not coding, I enjoy reading, hiking, and spending time with my family and friends.
+                </p>
+                <p>
+                    I am excited to con tinue my journey as a software developer and contribute to the growth and success of organizations that value innovation, inclusivity, and excellence.
+                </p>
+            </div>
 		</section>
 		<section id="experience">
             <h2>Experience</h2>
@@ -68,32 +83,108 @@
             </div>
         </section>
 		<section id="code-examples">
-			<h2>Code Examples</h2>
-			<div class="slider">
-				<div class="slide">
-					<h3>Example 1</h3>
-					<img src="flowchart1.jpg" alt="Flowchart 1">
-					<pre><code>function helloWorld() {console.log("Hello, World!");}</code></pre>
-				</div>
-				<div class="slide">
-					<h3>Example 2</h3>
-					<img src="flowchart2.jpg" alt="Flowchart 2">
-					<pre><code>const add = (a, b) => a + b;</code></pre>
-				</div>
-				<div class="slide">
-					<h3>Example 3</h3>
-					<img src="flowchart3.jpg" alt="Flowchart 3">
-					<pre>
-                        <code>class Person {
-                            constructor(name, age) {
-                                this.name = name;
-                                this.age = age;
-                            }
-                        }</code>
-                    </pre>
-				</div>
-			</div>
-		</section>
+            <h2>Code Examples</h2>
+            <div class="slider">
+                <div class="slide">
+                    <h3>Parametrized filtering of MONGO entries in RESTful API</h3>
+                    <pre><code class="language-java">
+@SuppressWarnings("unchecked")
+private FilterOperationResult getFilterOperation(Map<String, Object> filter, String by) {
+    List<MatchOperation> filterOperations = new ArrayList<>();
+    var sortOperation = Aggregation.sort(Sort.by(Sort.Direction.DESC, ENTITY_ID));
+    List<AggregationOperation> searchOperations = new ArrayList<>();
+    if (filter != null) {
+        for (Map.Entry<String, Object> entry : filter.entrySet()) {
+            var key = entry.getKey();
+            var value = entry.getValue();
+
+            if (key.equals(SORT)) {
+                var sortCriteria = (List<Map<String, String>>) value;
+                List<Sort.Order> orders = new ArrayList<>();
+                for (Map<String, String> criteria : sortCriteria) {
+                    var field = by == null ? criteria.get(FIELD) : ID;
+                    var order = criteria.get(DIRECTION);
+                    var direction = Sort.Direction.fromString(order);
+                    orders.add(new Sort.Order(direction, field));
+                }
+                sortOperation = Aggregation.sort(Sort.by(orders));
+            } else if (key.equals(SEARCH)) {
+                var groupByClauseEmpty = !StringUtils.hasText(by);
+
+                if (!numeric(value.toString())) {
+                    searchOperations.add(groupByClauseEmpty ?
+                            null :
+                            Aggregation.match(Criteria.where(by).regex(value.toString(), "i")));
+                } else {
+                    searchOperations.add(Aggregation.addFields()
+                            .addField(by + STRING)
+                            .withValue(ConvertOperators.ToString.toString("$" + by))
+                            .build());
+                    searchOperations.add(Aggregation.match(Criteria.where(by + STRING).regex(value.toString())));
+                    searchOperations.add(Aggregation.project()
+                            .andExclude(by + STRING));
+                }
+            } else {
+                if (value instanceof List<?>) {
+                    filterOperations.add(Aggregation.match(Criteria.where(key).in((List<?>) value)));
+                } else {
+                    var from = (String) ((LinkedHashMap<String, String>) value).get(FROM);
+                    var to = (String) ((LinkedHashMap<String, String>) value).get(TO);
+
+                    var dateCriteria = Criteria.where(key);
+
+                    dateCriteriaHandler(filterOperations, from, to, dateCriteria);
+                }
+            }
+        }
+    }
+    return new FilterOperationResult(filterOperations, sortOperation, searchOperations);
+}                    
+                    </code></pre>
+                </div>
+                <div class="slide">
+                    <h3>Usage of RegisterBeanDefinition in order to create the bean using key from YAML file</h3>
+                    <pre><code class="language-java">
+@Configuration
+public class ApplicationConfig {
+
+    private static final String ALGORITHM = "";
+
+    @Value("${encryptor.pool-size}")
+    private int encryptorPoolSize;
+    @Value("${encryptor.enabled}")
+    private boolean encryptionEnabled;
+
+    @Autowired
+    private KeysProperties keysProperties;
+    @Autowired
+    private GenericApplicationContext context;
+
+    @PostConstruct
+    public void init() {
+        if (encryptionEnabled) {
+            keysProperties.getKeys().forEach((k, v) -> {
+                var definitionBuilder = rootBeanDefinition(PooledPBEStringEncryptor.class)
+                        .addPropertyValue("algorithm", ALGORITHM)
+                        .addPropertyValue("ivGenerator", new RandomIvGenerator())
+                        .addPropertyValue("password", v.getKey())
+                        .addPropertyValue("poolSize", encryptorPoolSize);
+
+                context.registerBeanDefinition(k, definitionBuilder.getBeanDefinition());
+            });
+        }
+    }
+
+    @Bean
+    public EncryptionService encryptionService(KafkaTopicsProperties kafkaTopicsProperties,
+                                               Map<String, PBEStringEncryptor> encryptors) {
+        return new EncryptionService(encryptionEnabled, kafkaTopicsProperties, keysProperties, encryptors);
+    }
+}
+                    </code></pre>
+                </div>
+            </div>
+        </section>
 		<section id="contacts">
             <h2>Contact Me</h2>
                 <p>You can reach me at <a href="mailto:example@example.com">butapro7@gmail.com</a> or <a href="https://www.linkedin.com/in/artsiom-butomau-88b6b85b/">LinkedIn</a></a>.</p>
